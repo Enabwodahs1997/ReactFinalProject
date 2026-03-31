@@ -1,0 +1,38 @@
+/* Global styles loaded by main.jsx */
+:root {
+  --edge: #6f8e69;
+  --ink: #2b3d2d;
+  --mist: #f4f0e5;
+  --fern: #2f5d3d;
+  --moss: #4f6f44;
+  --bark: #5a4634;
+  --clay: #8d6b4e;
+  --paper: #f3eddc;
+
+  font-family: 'Palatino Linotype', Palatino, 'Book Antiqua', Georgia, serif;
+  color: var(--ink);
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  background:
+    radial-gradient(circle at 14% 0%, rgba(209, 220, 178, 0.45), transparent 42%),
+    radial-gradient(circle at 88% 18%, rgba(113, 136, 92, 0.28), transparent 40%),
+    repeating-linear-gradient(
+      24deg,
+      rgba(255, 255, 255, 0.04) 0,
+      rgba(255, 255, 255, 0.04) 2px,
+      transparent 2px,
+      transparent 7px
+    ),
+    linear-gradient(180deg, #d8d0b8, #c3c39e 58%, #a4b183);
+}
+
+#root {
+  min-height: 100vh;
+}
