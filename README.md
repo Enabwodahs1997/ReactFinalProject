@@ -1,16 +1,57 @@
-# React + Vite
+# Final React Project
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A rustic forest-themed task manager built with React and Vite.
 
-Currently, two official plugins are available:
+## Features Included
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+- Add tasks with a title and description
+- Mark tasks as complete using a checkbox
+- Delete individual tasks
+- Clear all tasks with one button
+- Live task stats (total tasks and completed tasks)
+- Filter/search tasks by title or description
+- Data persistence using localStorage (tasks remain after refresh)
+- Responsive layout and custom forest/rustic styling
 
-## React Compiler
+## What Is Used
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+### Frontend
 
-## Expanding the ESLint configuration
+- React 19
+- React DOM
+- Vite 8
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+### Project Structure
+
+- Functional React components
+- Custom hooks:
+  - `useLocalStorage` for persistence
+  - `useFilterTasks` for task filtering
+
+### Tooling
+
+- ESLint 9
+- `@vitejs/plugin-react`
+
+## Available Scripts
+
+- `npm run dev` - start development server
+- `npm run build` - create production build
+- `npm run preview` - preview production build locally
+- `npm run lint` - run lint checks
+
+## Getting Started
+
+1. Install dependencies:
+
+```bash
+npm install
+```
+
+2. Start the app:
+
+```bash
+npm run dev
+```
+
+3. Open the local URL shown in the terminal.
