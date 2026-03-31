@@ -1,10 +1,13 @@
-import React from "react";
-import { useFilterTasks } from '../hooks/useFilterTasks';
+import { memo } from "react";
+import { useTaskFilter } from '../hooks/useTaskFilter';
 
-export default function TaskList({ tasks = [], onClearTasks, onToggleTask, onDeleteTask }) {
-  const [filterInput, setFilterInput] = React.useState('');
-  const filteredTasks = useFilterTasks(tasks, filterInput);
-  const hasFilter = filterInput.trim().length > 0;
+// This component is responsible for displaying the list of tasks,
+// including the search filter, and providing options to clear tasks, 
+// toggle task completion, and delete tasks. It uses the useTaskFilter 
+// hook to manage the filtering logic based on user input.
+
+function TaskList({ tasks = [], onClearTasks, onToggleTask, onDeleteTask }) {
+  const { filterInput, setFilterInput, filteredTasks, hasFilter, resetFilter } = useTaskFilter(tasks);
 
   return (
     <div className="task-list">
@@ -32,7 +35,7 @@ export default function TaskList({ tasks = [], onClearTasks, onToggleTask, onDel
           <button
             type="button"
             className="btn btn-filter-reset"
-            onClick={() => setFilterInput('')}
+            onClick={resetFilter}
           >
             Reset
           </button>
@@ -45,12 +48,12 @@ export default function TaskList({ tasks = [], onClearTasks, onToggleTask, onDel
       ) : (
         <ul className="task-items">
             {filteredTasks.map(({ task, index }) => (
-                <li className="task-item" key={`${task.name}-${index}`}>
+                <li className="task-item" key={task.id ?? `${task.name}-${index}`}>
                     <label className="task-check">
                       <input
                         type="checkbox"
                         checked={Boolean(task.completed)}
-                        onChange={() => onToggleTask(index)}
+                        onChange={() => onToggleTask(task.id)}
                       />
                       <strong className={task.completed ? 'task-name done' : 'task-name'}>
                         {task.name}
@@ -59,7 +62,7 @@ export default function TaskList({ tasks = [], onClearTasks, onToggleTask, onDel
                     <span className={task.completed ? 'task-description done' : 'task-description'}>
                       {task.description}
                     </span>
-                    <button className="btn btn-delete" type="button" onClick={() => onDeleteTask(index)}>
+                    <button className="btn btn-delete" type="button" onClick={() => onDeleteTask(task.id)}>
                       Delete
                     </button>
                 </li>
@@ -69,3 +72,5 @@ export default function TaskList({ tasks = [], onClearTasks, onToggleTask, onDel
     </div>
   );
 }
+
+export default memo(TaskList);
