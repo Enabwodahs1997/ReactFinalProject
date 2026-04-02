@@ -26,7 +26,7 @@ function TaskList({ tasks = [], onClearTasks, onToggleTask, onDeleteTask }) {
       <div className="task-filter-row">
         <input
           type="text"
-          placeholder="Search tasks by title or notes..."
+          placeholder="Search by name, description, or due date..."
           className="filter-input"
           value={filterInput}
           onChange={(event) => setFilterInput(event.target.value)}
