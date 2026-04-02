@@ -1,6 +1,14 @@
 import { useState, useEffect, useCallback, useRef, useId } from "react"
 
 const LOCAL_STORAGE_SYNC_EVENT = "local-storage-sync"
+//used this from a previous project, it is a custom hook that allows you 
+// to use localStorage in a React component.
+//I had AI make sure it handles edge cases, such as when localStorage is not available 
+// (e.g., in private browsing mode) and ensures that the application continues to 
+// function without crashing.
+//I also had AI implement a synchronization mechanism using custom events to ensure that 
+// changes to localStorage in one instance of the application are reflected across all instances, 
+// which is particularly useful when multiple tabs or windows are open.
 
 export function useLocalStorage(key, initialValue) {
 	const instanceId = useId()

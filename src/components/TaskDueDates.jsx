@@ -7,7 +7,7 @@ export const TaskDueDates = () => {
         const today = new Date();
         const startOfToday = new Date(today.getFullYear(), today.getMonth(), today.getDate());
         const nextSevenDays = new Date(startOfToday.getTime() + 7 * 24 * 60 * 60 * 1000);
-
+//couldn't tell you the date stuff I had AI help me because time and date are a nightmare.
         return tasks
             .filter((task) => {
                 if (!task?.dueDate) {
@@ -23,7 +23,11 @@ export const TaskDueDates = () => {
             })
             .sort((leftTask, rightTask) => new Date(leftTask.dueDate) - new Date(rightTask.dueDate));
     }, [tasks]);
-
+//I built this return component to help guide AI with what I wanted the TaskDueDates component to do, 
+// which is to display a list of tasks that are due within the next 7 days. 
+// It filters the tasks based on their due dates and sorts them in ascending order. 
+// If there are no upcoming tasks, it displays a message indicating that there are no 
+// tasks due in the next 7 days.
     return (
         <div className="task-due-dates">
             <h2>Upcoming Tasks</h2>

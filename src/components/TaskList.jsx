@@ -8,7 +8,8 @@ import { useTaskFilter } from '../hooks/useTaskFilter';
 
 function TaskList({ tasks = [], onClearTasks, onToggleTask, onDeleteTask }) {
   const { filterInput, setFilterInput, filteredTasks, hasFilter, resetFilter } = useTaskFilter(tasks);
-
+//I built this and had AI help me with the implementation of the filtering logic, 
+// which allows users to search for tasks by their title or description.
   return (
     <div className="task-list">
       <div className="task-list-header">

@@ -28,7 +28,13 @@ export default function TaskSubmission() {
         if (task?.id) {
           return task;
         }
-
+//missing ID logic to ensure that all tasks have a unique identifier, 
+// which is crucial for managing task state and interactions effectively.
+//this insures that even if there are older tasks that were created without an ID,
+// they will be assigned a unique ID when the component mounts, 
+// allowing for consistent behavior across all tasks. I had AI help me understand why and how the
+//code would work and then used previos knowledge of how to generate unique IDs 
+// to implement the createTaskId function.
         hasMissingId = true;
         return { ...task, id: createTaskId() };
       });
@@ -64,7 +70,9 @@ export default function TaskSubmission() {
     if (!name || !description) {
       return;
     }
-
+//I kept struggling with the form submission logic, so I had AI help me implement the handleSubmit 
+// function to ensure that it correctly captures the form data, validates it, and creates a 
+// new task with a unique ID.
     const newTask = {
       id: createTaskId(),
       name,
