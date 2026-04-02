@@ -1,11 +1,23 @@
-import { useCallback, useDeferredValue, useMemo, useState } from 'react';
+import { useCallback, useDeferredValue, useEffect, useMemo, useState } from 'react';
 
 // This custom hook manages the state and logic for filtering tasks 
 // based on user input.
 
 export function useTaskFilter(tasks = []) {
   const [filterInput, setFilterInput] = useState('');
-  const deferredFilterInput = useDeferredValue(filterInput);
+  const [debouncedFilterInput, setDebouncedFilterInput] = useState('');
+
+  useEffect(() => {
+    const timeoutId = window.setTimeout(() => {
+      setDebouncedFilterInput(filterInput);
+    }, 180);
+
+    return () => {
+      window.clearTimeout(timeoutId);
+    };
+  }, [filterInput]);
+
+  const deferredFilterInput = useDeferredValue(debouncedFilterInput);
 
   const filteredTasks = useMemo(() => {
     const query = deferredFilterInput.trim().toLowerCase();

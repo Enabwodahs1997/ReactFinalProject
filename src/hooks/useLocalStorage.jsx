@@ -1,8 +1,9 @@
-import { useState, useEffect, useCallback } from "react"
+import { useState, useEffect, useCallback, useRef, useId } from "react"
 
 const LOCAL_STORAGE_SYNC_EVENT = "local-storage-sync"
 
 export function useLocalStorage(key, initialValue) {
+	const instanceId = useId()
 	const [value, setValue] = useState(() => {
 		try {
 			const savedValue = localStorage.getItem(key)
@@ -16,25 +17,32 @@ export function useLocalStorage(key, initialValue) {
 
 		return initialValue
 	})
-
-	const setStoredValue = useCallback((nextValueOrUpdater) => {
-		setValue((previousValue) =>
-			typeof nextValueOrUpdater === "function"
-				? nextValueOrUpdater(previousValue)
-				: nextValueOrUpdater
-		)
-	}, [])
+	const valueRef = useRef(value)
 
 	useEffect(() => {
+		valueRef.current = value
+	}, [value])
+
+	const setStoredValue = useCallback((nextValueOrUpdater) => {
+		const nextValue =
+			typeof nextValueOrUpdater === "function"
+				? nextValueOrUpdater(valueRef.current)
+				: nextValueOrUpdater
+
+		valueRef.current = nextValue
+		setValue(nextValue)
+
 		try {
-			localStorage.setItem(key, JSON.stringify(value))
+			localStorage.setItem(key, JSON.stringify(nextValue))
 			window.dispatchEvent(
-				new CustomEvent(LOCAL_STORAGE_SYNC_EVENT, { detail: { key, value } })
+				new CustomEvent(LOCAL_STORAGE_SYNC_EVENT, {
+					detail: { key, value: nextValue, source: instanceId },
+				})
 			)
 		} catch {
 			// Ignore write failures (private mode/full storage) and keep app running.
 		}
-	}, [key, value])
+	}, [key, instanceId])
 
 	useEffect(() => {
 		const syncValue = (event) => {
@@ -56,6 +64,10 @@ export function useLocalStorage(key, initialValue) {
 				return
 			}
 
+			if (event.detail.source === instanceId) {
+				return
+			}
+
 			setValue(event.detail.value)
 		}
 
@@ -66,7 +78,7 @@ export function useLocalStorage(key, initialValue) {
 			window.removeEventListener("storage", syncValue)
 			window.removeEventListener(LOCAL_STORAGE_SYNC_EVENT, syncValue)
 		}
-	}, [key, initialValue])
+	}, [key, initialValue, instanceId])
 
 	return [value, setStoredValue]
 }
