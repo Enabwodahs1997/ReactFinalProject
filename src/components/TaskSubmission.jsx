@@ -59,12 +59,19 @@ export default function TaskSubmission() {
 
     const name = formData.get('name')?.toString().trim();
     const description = formData.get('description')?.toString().trim();
+    const dueDate = formData.get('dueDate')?.toString().trim();
 
     if (!name || !description) {
       return;
     }
 
-    const newTask = { id: createTaskId(), name, description, completed: false };
+    const newTask = {
+      id: createTaskId(),
+      name,
+      description,
+      dueDate: dueDate || null,
+      completed: false,
+    };
     setTasks((prevTasks) => [...prevTasks, newTask]);
     event.target.reset();
   };
@@ -77,6 +84,7 @@ export default function TaskSubmission() {
       <form className="task-form" onSubmit={handleSubmit}>
         <input className="task-input" type="text" name="name" placeholder="Task Name" required />
         <input className="task-input" type="text" name="description" placeholder="Task Description" required />
+        <input className="task-input" type="date" name="dueDate" aria-label="Task due date" />
         <button className="btn btn-primary" type="submit">Add Task</button>
       </form>
 

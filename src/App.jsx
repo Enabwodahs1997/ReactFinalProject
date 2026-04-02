@@ -1,5 +1,6 @@
 import TaskSubmission from './components/TaskSubmission'
 import './App.css'
+import { TaskDueDates } from './components/TaskDueDates'
 
 // The App component serves as the main entry point of the application, 
 // rendering the TaskSubmission component which contains the core 
@@ -15,6 +16,7 @@ function App() {
           <p>Plan your day, track progress, and clear completed work.</p>
         </header>
         <TaskSubmission />
+        <TaskDueDates />
       </main>
     </div>
   )
