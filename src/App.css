@@ -231,6 +231,41 @@
 	box-shadow: 0 6px 14px rgba(82, 61, 38, 0.2);
 }
 
+.page-error {
+	text-align: center;
+	padding: 2.2rem 1rem;
+	background: linear-gradient(170deg, #f7efd9, #ecdfc1);
+	border-radius: 16px;
+	border: 1px solid #c9b28b;
+	box-shadow: 0 14px 28px rgba(65, 54, 34, 0.16);
+}
+
+.page-error h1 {
+	margin: 0;
+	font-family: Cambria, Georgia, 'Times New Roman', serif;
+	color: #3f4f3b;
+}
+
+.page-error p {
+	margin: 0.65rem 0 1.1rem;
+	color: #5f553f;
+}
+
+.page-error-image {
+	width: min(100%, 360px);
+	height: auto;
+	display: block;
+	margin: 0 auto;
+	border-radius: 14px;
+	box-shadow: 0 12px 24px rgba(55, 45, 28, 0.2);
+}
+
+.page-error-home {
+	display: inline-block;
+	margin-top: 1rem;
+	text-decoration: none;
+}
+
 @media (max-width: 760px) {
 	.page-content {
 		padding: 1.1rem;
