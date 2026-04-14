@@ -271,6 +271,7 @@
 .calendar-page {
 	display: grid;
 	gap: 1rem;
+	min-width: 0;
 }
 
 .calendar-page h1 {
@@ -290,6 +291,7 @@
 	width: 100%;
 	max-width: 100%;
 	padding: 0.85rem;
+	overflow: hidden;
 	border-radius: 14px;
 	border: 1px solid #b6a382;
 	background: linear-gradient(180deg, #fbf5e7, #f2e8cf);
@@ -302,6 +304,10 @@
 	display: flex;
 	gap: 0.4rem;
 	margin-bottom: 0.6rem;
+}
+
+.calendar-shell .react-calendar__navigation__label {
+	min-width: 0;
 }
 
 .calendar-shell .react-calendar__navigation button {
@@ -474,6 +480,7 @@
 	font-size: 1.01rem;
 	line-height: 1.25;
 	color: #2f4832;
+	overflow-wrap: anywhere;
 }
 
 .calendar-task-desc {
@@ -482,6 +489,7 @@
 	font-size: 0.95rem;
 	line-height: 1.35;
 	white-space: pre-wrap;
+	overflow-wrap: anywhere;
 }
 
 .calendar-color-label {
@@ -815,21 +823,42 @@
 		padding: 0.65rem;
 	}
 
+	.calendar-shell .react-calendar__month-view__weekdays {
+		font-size: 0.68rem;
+	}
+
 	.calendar-shell .react-calendar__navigation {
 		gap: 0.3rem;
 	}
 
+	.calendar-shell .react-calendar__navigation__label {
+		font-size: 0.84rem;
+	}
+
 	.calendar-shell .react-calendar__navigation button {
-		min-width: 34px;
-		height: 34px;
-		padding: 0.35rem;
-		font-size: 0.86rem;
+		min-width: 30px;
+		height: 30px;
+		padding: 0.25rem;
+		font-size: 0.8rem;
 	}
 
 	.calendar-shell .react-calendar__tile {
-		min-height: 58px;
-		padding: 0.3rem;
-		font-size: 0.86rem;
+		min-height: 50px;
+		padding: 0.24rem;
+		font-size: 0.8rem;
+	}
+
+	.calendar-task-dots {
+		gap: 0.2rem;
+	}
+
+	.calendar-task-dot {
+		width: 0.62rem;
+		height: 0.62rem;
+	}
+
+	.calendar-task-count {
+		font-size: 0.65rem;
 	}
 
 	.calendar-task-row {
