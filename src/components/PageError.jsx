@@ -1,5 +1,6 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import droidBuddy from "../assets/droid-buddy.svg";
 
 export default function NotFound() {
     return (
@@ -7,7 +8,7 @@ export default function NotFound() {
             <h1>404 - Page Not Found</h1>
             <p>Sorry, the droid you are looking for does not exist.</p>
             <img
-                src="/assets/droid-buddy.png"
+                src={droidBuddy}
                 alt="Friendly sci-fi droid illustration"
                 className="page-error-image"
                 />

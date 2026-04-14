@@ -2,21 +2,13 @@ import { useCallback, useEffect } from 'react';
 import TaskList from './TaskList';
 import TaskListCount from './TaskCount';
 import { useLocalStorage } from '../hooks/useLocalStorage';
+import { createEntityId } from '../utils/id';
 
 //logic for creating the interactivity of the task submission form,
 //including handling form submission, toggling task completion, 
 // deleting tasks, and clearing all tasks. 
 // It also ensures that each task has a unique ID, 
 // even if older tasks were created without one.
-
-
-function createTaskId() {
-  if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-    return crypto.randomUUID();
-  }
-
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
 
 export default function TaskSubmission() {
   const [tasks, setTasks] = useLocalStorage('tasks', []);
@@ -36,7 +28,7 @@ export default function TaskSubmission() {
 //code would work and then used previos knowledge of how to generate unique IDs 
 // to implement the createTaskId function.
         hasMissingId = true;
-        return { ...task, id: createTaskId() };
+        return { ...task, id: createEntityId() };
       });
 
       return hasMissingId ? normalizedTasks : prevTasks;
@@ -74,7 +66,7 @@ export default function TaskSubmission() {
 // function to ensure that it correctly captures the form data, validates it, and creates a 
 // new task with a unique ID.
     const newTask = {
-      id: createTaskId(),
+      id: createEntityId(),
       name,
       description,
       dueDate: dueDate || null,
