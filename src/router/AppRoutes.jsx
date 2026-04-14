@@ -4,6 +4,7 @@ import HomePage from '../pages/HomePage'
 import CalendarTaskPage from '../pages/CalendarTaskPage'
 import JournalPage from '../pages/JournalPage'
 import NotesPage from '../pages/NotesPage'
+import AboutPage from '../pages/AboutPage'
 import NotFound from '../components/PageError'
 
 export default function AppRoutes() {
@@ -16,6 +17,7 @@ export default function AppRoutes() {
 				<Route path="calender" element={<CalendarTaskPage />} />
 				<Route path="journal" element={<JournalPage />} />
 				<Route path="notes" element={<NotesPage />} />
+				<Route path="about" element={<AboutPage />} />
 				<Route path="*" element={<NotFound />} />
 			</Route>
 		</Routes>

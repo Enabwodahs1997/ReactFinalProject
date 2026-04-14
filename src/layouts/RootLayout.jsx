@@ -1,4 +1,5 @@
 import { NavLink, Outlet } from 'react-router-dom'
+import Footer from '../components/Footer'
 
 export default function RootLayout() {
 	return (
@@ -20,9 +21,13 @@ export default function RootLayout() {
 						<NavLink to="/notes" className={({ isActive }) => `page-nav-link${isActive ? ' active' : ''}`}>
 							Notes
 						</NavLink>
+						<NavLink to="/about" className={({ isActive }) => `page-nav-link${isActive ? ' active' : ''}`}>
+							About
+						</NavLink>
 					</nav>
 				</header>
 				<Outlet />
+				<Footer />
 			</main>
 		</div>
 	)
