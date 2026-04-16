@@ -1,4 +1,7 @@
-import * as XLSX from 'xlsx'
+const MAX_IMPORT_FILE_BYTES = 2 * 1024 * 1024
+const MAX_ROWS_PER_SHEET = 5000
+const MAX_TOTAL_ROWS = 10000
+let excelJsModulePromise
 
 const DEFAULT_COLUMN_ALIASES = {
   name: [
@@ -26,6 +29,175 @@ function normalizeHeader(value) {
     .toLowerCase()
     .replace(/[_-]+/g, ' ')
     .replace(/\s+/g, ' ')
+}
+
+function ensureImportFileIsSafe(file) {
+  if (!file) {
+    throw new Error('Please choose an Excel file first.')
+  }
+
+  const lowerCaseName = String(file.name ?? '').toLowerCase()
+  if (!lowerCaseName.endsWith('.xlsx')) {
+    throw new Error('Only .xlsx files are supported.')
+  }
+
+  if (typeof file.size === 'number' && file.size > MAX_IMPORT_FILE_BYTES) {
+    throw new Error('File is too large. Please upload an .xlsx file smaller than 2MB.')
+  }
+}
+
+function toTextFromCellValue(value) {
+  if (value === null || value === undefined) {
+    return ''
+  }
+
+  if (value instanceof Date) {
+    return toDateInputValue(value)
+  }
+
+  if (typeof value === 'object') {
+    if (Array.isArray(value.richText)) {
+      return value.richText.map((item) => item?.text ?? '').join('')
+    }
+
+    if (typeof value.text === 'string') {
+      return value.text
+    }
+
+    if (value.hyperlink) {
+      return String(value.text ?? value.hyperlink)
+    }
+
+    if (value.result !== undefined && value.result !== null) {
+      return toTextFromCellValue(value.result)
+    }
+
+    if (value.formula) {
+      return ''
+    }
+  }
+
+  return String(value)
+}
+
+function toRawCellValue(value) {
+  if (value === null || value === undefined) {
+    return ''
+  }
+
+  if (value instanceof Date) {
+    return value
+  }
+
+  if (typeof value === 'object') {
+    if (value.result !== undefined && value.result !== null) {
+      return value.result
+    }
+
+    if (Array.isArray(value.richText)) {
+      return value.richText.map((item) => item?.text ?? '').join('')
+    }
+
+    if (typeof value.text === 'string') {
+      return value.text
+    }
+
+    if (value.hyperlink) {
+      return String(value.text ?? value.hyperlink)
+    }
+
+    if (value.formula) {
+      return ''
+    }
+  }
+
+  return value
+}
+
+function buildUniqueHeaders(rawHeaders) {
+  const seenHeaders = new Map()
+
+  return rawHeaders.map((header, index) => {
+    const baseHeader = toTrimmedText(header) || `Column ${index + 1}`
+    const seenCount = seenHeaders.get(baseHeader) ?? 0
+    seenHeaders.set(baseHeader, seenCount + 1)
+
+    if (seenCount === 0) {
+      return baseHeader
+    }
+
+    return `${baseHeader} (${seenCount + 1})`
+  })
+}
+
+function parseWorksheetRows(worksheet) {
+  const headerRow = worksheet.getRow(1)
+  const columnCount = Math.max(worksheet.columnCount || 0, headerRow.cellCount || 0, 1)
+
+  const rawHeaders = Array.from({ length: columnCount }, (_, index) => {
+    const cellValue = headerRow.getCell(index + 1).value
+    return toTextFromCellValue(cellValue)
+  })
+
+  const headers = buildUniqueHeaders(rawHeaders)
+  const rows = []
+
+  for (let rowIndex = 2; rowIndex <= worksheet.rowCount; rowIndex += 1) {
+    const row = worksheet.getRow(rowIndex)
+    const rowRecord = {}
+    let hasAnyValue = false
+
+    for (let columnIndex = 0; columnIndex < headers.length; columnIndex += 1) {
+      const header = headers[columnIndex]
+      const cellValue = toRawCellValue(row.getCell(columnIndex + 1).value)
+      rowRecord[header] = cellValue
+
+      if (!hasAnyValue && hasNonEmptyValue(cellValue)) {
+        hasAnyValue = true
+      }
+    }
+
+    if (hasAnyValue) {
+      rows.push(rowRecord)
+    }
+  }
+
+  return {
+    headers,
+    rows,
+  }
+}
+
+function ensureRowLimits(rows, sheetName) {
+  if (rows.length > MAX_ROWS_PER_SHEET) {
+    throw new Error(`Sheet "${sheetName}" has too many rows. Limit is ${MAX_ROWS_PER_SHEET}.`)
+  }
+}
+
+function ensureTotalRowLimit(totalRows) {
+  if (totalRows > MAX_TOTAL_ROWS) {
+    throw new Error(`Workbook has too many rows. Limit is ${MAX_TOTAL_ROWS}.`)
+  }
+}
+
+async function readWorkbookFromFile(file) {
+  ensureImportFileIsSafe(file)
+
+  const arrayBuffer = await file.arrayBuffer()
+  if (!excelJsModulePromise) {
+    excelJsModulePromise = import('exceljs')
+  }
+
+  const excelJsModule = await excelJsModulePromise
+  const ExcelWorkbook = excelJsModule.Workbook ?? excelJsModule.default?.Workbook
+
+  if (!ExcelWorkbook) {
+    throw new Error('Excel parser failed to load. Please refresh and try again.')
+  }
+
+  const workbook = new ExcelWorkbook()
+  await workbook.xlsx.load(arrayBuffer)
+  return workbook
 }
 
 function toDateInputValue(date) {
@@ -68,12 +240,20 @@ function parseExcelNumericDate(value, options = {}) {
     return null
   }
 
-  const parsed = XLSX.SSF.parse_date_code(value, { date1904 })
-  if (!parsed || !parsed.y || !parsed.m || !parsed.d) {
-    return null
+  const excelEpoch = date1904
+    ? Date.UTC(1904, 0, 1)
+    : Date.UTC(1899, 11, 30)
+  const dayInMilliseconds = 24 * 60 * 60 * 1000
+  const wholeDays = Math.floor(value)
+  const fractionalDays = value - wholeDays
+
+  const candidateTimestamp = excelEpoch + wholeDays * dayInMilliseconds + Math.round(fractionalDays * dayInMilliseconds)
+  const candidate = new Date(candidateTimestamp)
+
+  if (!date1904 && wholeDays >= 60) {
+    candidate.setDate(candidate.getDate() - 1)
   }
 
-  const candidate = new Date(parsed.y, parsed.m - 1, parsed.d)
   return Number.isNaN(candidate.getTime()) ? null : candidate
 }
 
@@ -234,17 +414,12 @@ function normalizeTaskFromRow(row, columnMap, options = {}) {
   }
 }
 
-function extractTasksFromSheet(sheet, customAliases, options = {}) {
-  const rows = XLSX.utils.sheet_to_json(sheet, {
-    defval: '',
-    raw: true,
-  })
+function extractTasksFromRows(rows, headers, customAliases, options = {}) {
 
   if (rows.length === 0) {
     return []
   }
 
-  const headers = Object.keys(rows[0])
   const detectedColumnMap = resolveColumnMap(headers, customAliases)
   const explicitColumnMap = options.columnMap ?? {}
   const columnMap = {
@@ -256,13 +431,6 @@ function extractTasksFromSheet(sheet, customAliases, options = {}) {
   return rows
     .map((row) => normalizeTaskFromRow(row, columnMap, options))
     .filter(Boolean)
-}
-
-function extractSheetRows(sheet) {
-  return XLSX.utils.sheet_to_json(sheet, {
-    defval: '',
-    raw: true,
-  })
 }
 
 function buildSheetPreview(sheetName, rows, customAliases, sampleSize = 8) {
@@ -286,24 +454,26 @@ function buildSheetPreview(sheetName, rows, customAliases, sampleSize = 8) {
 }
 
 export async function extractTasksFromWorkbookFile(file, options = {}) {
-  if (!file) {
-    throw new Error('Please choose an Excel file first.')
-  }
-
-  const arrayBuffer = await file.arrayBuffer()
-  const workbook = XLSX.read(arrayBuffer, {
-    type: 'array',
-    cellDates: true,
-  })
-
-  const usesDate1904 = Boolean(workbook?.Workbook?.WBProps?.date1904)
+  const workbook = await readWorkbookFromFile(file)
+  const usesDate1904 = Boolean(workbook.properties?.date1904)
   const targetSheetNames = options.sheetName
-    ? workbook.SheetNames.filter((name) => name === options.sheetName)
-    : workbook.SheetNames
+    ? workbook.worksheets.map((sheet) => sheet.name).filter((name) => name === options.sheetName)
+    : workbook.worksheets.map((sheet) => sheet.name)
+
+  let totalRows = 0
 
   const importedTasks = targetSheetNames.flatMap((sheetName) => {
-    const sheet = workbook.Sheets[sheetName]
-    return extractTasksFromSheet(sheet, options.columnAliases, {
+    const sheet = workbook.getWorksheet(sheetName)
+    if (!sheet) {
+      return []
+    }
+
+    const { headers, rows } = parseWorksheetRows(sheet)
+    ensureRowLimits(rows, sheetName)
+    totalRows += rows.length
+    ensureTotalRowLimit(totalRows)
+
+    return extractTasksFromRows(rows, headers, options.columnAliases, {
       date1904: usesDate1904,
       columnMap: options.columnMap,
     })
@@ -313,25 +483,30 @@ export async function extractTasksFromWorkbookFile(file, options = {}) {
 }
 
 export async function readWorkbookPreviewFromFile(file, options = {}) {
-  if (!file) {
-    throw new Error('Please choose an Excel file first.')
-  }
-
+  const workbook = await readWorkbookFromFile(file)
   const sampleSize = typeof options.sampleSize === 'number' ? options.sampleSize : 8
-  const arrayBuffer = await file.arrayBuffer()
-  const workbook = XLSX.read(arrayBuffer, {
-    type: 'array',
-    cellDates: true,
-  })
 
-  const sheets = workbook.SheetNames.map((sheetName) => {
-    const sheet = workbook.Sheets[sheetName]
-    const rows = extractSheetRows(sheet)
-    return buildSheetPreview(sheetName, rows, options.columnAliases, sampleSize)
+  let totalRows = 0
+
+  const sheets = workbook.worksheets.map((sheet) => {
+    const sheetName = sheet.name
+    const { headers, rows } = parseWorksheetRows(sheet)
+    ensureRowLimits(rows, sheetName)
+    totalRows += rows.length
+    ensureTotalRowLimit(totalRows)
+
+    const previewRows = rows.map((row) =>
+      headers.reduce((accumulator, header) => {
+        accumulator[header] = toTextFromCellValue(row[header])
+        return accumulator
+      }, {})
+    )
+
+    return buildSheetPreview(sheetName, previewRows, options.columnAliases, sampleSize)
   })
 
   return {
-    sheetNames: workbook.SheetNames,
+    sheetNames: workbook.worksheets.map((sheet) => sheet.name),
     sheets,
   }
 }

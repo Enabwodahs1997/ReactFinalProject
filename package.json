@@ -11,14 +11,14 @@
     "deploy": "npm run build && wrangler deploy"
   },
   "dependencies": {
+    "exceljs": "^4.4.0",
     "react": "^19.2.4",
     "react-calendar": "^6.0.1",
     "react-dom": "^19.2.4",
-    "react-router-dom": "^7.13.2",
-    "xlsx": "^0.18.5"
+    "react-router-dom": "^7.13.2"
   },
   "engines": {
-    "node": ">=20 <23"
+    "node": ">=20 <25"
   },
   "devDependencies": {
     "@cloudflare/vite-plugin": "^1.32.3",

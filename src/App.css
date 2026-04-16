@@ -1,7 +1,46 @@
 .app-shell {
-	max-width: 980px;
+	max-width: 1240px;
 	margin: 0 auto;
 	padding: 2.5rem 1rem 3.2rem;
+}
+
+.app-main-shell {
+	display: grid;
+	grid-template-columns: minmax(220px, 280px) minmax(0, 1fr);
+	align-items: start;
+	gap: 1rem;
+}
+
+.app-sidebar {
+	position: sticky;
+	top: 1rem;
+	align-self: start;
+	max-height: calc(100vh - 2rem);
+}
+
+.app-sidebar .task-due-dates {
+	margin: 0;
+	height: 100%;
+	max-height: calc(100vh - 2rem);
+	overflow: auto;
+	padding-right: 0.65rem;
+	scrollbar-width: thin;
+	scrollbar-color: #a89270 rgba(255, 255, 255, 0.4);
+}
+
+.app-sidebar .task-due-dates::-webkit-scrollbar {
+	width: 10px;
+}
+
+.app-sidebar .task-due-dates::-webkit-scrollbar-track {
+	background: rgba(255, 255, 255, 0.42);
+	border-radius: 999px;
+}
+
+.app-sidebar .task-due-dates::-webkit-scrollbar-thumb {
+	background: linear-gradient(180deg, #c4ad84, #a58b62);
+	border-radius: 999px;
+	border: 2px solid rgba(255, 255, 255, 0.35);
 }
 
 .page-content {
@@ -967,6 +1006,23 @@ select.task-input {
 }
 
 @media (max-width: 760px) {
+	.app-shell {
+		padding-top: 1.2rem;
+	}
+
+	.app-main-shell {
+		grid-template-columns: 1fr;
+	}
+
+	.app-sidebar {
+		position: static;
+		max-height: none;
+	}
+
+	.app-sidebar .task-due-dates {
+		max-height: none;
+	}
+
 	.page-content {
 		padding: 1.1rem;
 	}

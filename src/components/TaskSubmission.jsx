@@ -125,14 +125,14 @@ export default function TaskSubmission() {
       setSelectedImportIds([]);
       setImportFileName(file.name);
       setImportMessage('File loaded. Choose your sheet/columns, then click Preview Tasks.');
-    } catch {
+    } catch (error) {
       setUploadedWorkbook(null);
       setImportPreviewRows([]);
       setSelectedImportIds([]);
       setSelectedSheetName('');
       setSelectedColumns({ nameKey: '', descriptionKey: '', dueDateKey: '' });
       setImportFileName('');
-      setImportMessage('Unable to read that Excel file. Use .xlsx or .xls and check your column names.');
+      setImportMessage(error instanceof Error ? error.message : 'Unable to read that Excel file. Use .xlsx and check your column names.');
     } finally {
       setIsImporting(false);
       event.target.value = '';
@@ -209,10 +209,10 @@ export default function TaskSubmission() {
       setImportPreviewRows(previewRows);
       setSelectedImportIds(defaultSelectedRows);
       setImportMessage(`Loaded ${previewRows.length} task(s) from ${selectedSheetName}. Pick what to import.`);
-    } catch {
+    } catch (error) {
       setImportPreviewRows([]);
       setSelectedImportIds([]);
-      setImportMessage('Could not build the task preview from your selected columns.');
+      setImportMessage(error instanceof Error ? error.message : 'Could not build the task preview from your selected columns.');
     } finally {
       setIsPreparingPreview(false);
     }
@@ -295,7 +295,7 @@ export default function TaskSubmission() {
           id="excel-upload"
           className="task-input"
           type="file"
-          accept=".xlsx,.xls"
+          accept=".xlsx"
           onChange={handleExcelImport}
           disabled={isImporting}
         />
