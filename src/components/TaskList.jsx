@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { useTaskFilter } from '../hooks/useTaskFilter';
+import { parseTaskDueDate } from '../utils/dateTime';
 
 // This component is responsible for displaying the list of tasks,
 // including the search filter, and providing options to clear tasks, 
@@ -48,7 +49,17 @@ function TaskList({ tasks = [], onClearTasks, onToggleTask, onDeleteTask }) {
         <p className="empty-state">No tasks match your search.</p>
       ) : (
         <ul className="task-items">
-            {filteredTasks.map(({ task, index }) => (
+            {filteredTasks.map(({ task, index }) => {
+                const parsedDueDate = parseTaskDueDate(task?.dueDate);
+                const dueDateLabel = parsedDueDate
+                  ? parsedDueDate.toLocaleDateString(undefined, {
+                      month: 'short',
+                      day: 'numeric',
+                      year: 'numeric',
+                    })
+                  : null;
+
+                return (
                 <li className="task-item" key={task.id ?? `${task.name}-${index}`}>
                     <label className="task-check">
                       <input
@@ -63,11 +74,16 @@ function TaskList({ tasks = [], onClearTasks, onToggleTask, onDeleteTask }) {
                     <span className={task.completed ? 'task-description done' : 'task-description'}>
                       {task.description}
                     </span>
+                    {dueDateLabel ? (
+                      <span className={task.completed ? 'task-due-date done' : 'task-due-date'}>
+                        Due: {dueDateLabel}
+                      </span>
+                    ) : null}
                     <button className="btn btn-delete" type="button" onClick={() => onDeleteTask(task.id)}>
                       Delete
                     </button>
                 </li>
-            ))}
+            )})}
         </ul>
       )}
     </div>

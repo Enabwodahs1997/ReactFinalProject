@@ -1,5 +1,6 @@
 import React, { useMemo } from "react";
 import { useLocalStorage } from "../hooks/useLocalStorage";
+import { parseTaskDueDate } from "../utils/dateTime";
 
 export const TaskDueDates = () => {
     const [tasks] = useLocalStorage("tasks", []);
@@ -14,14 +15,23 @@ export const TaskDueDates = () => {
                     return false;
                 }
 
-                const dueDate = new Date(task.dueDate);
-                if (Number.isNaN(dueDate.getTime())) {
+                const dueDate = parseTaskDueDate(task.dueDate);
+                if (!dueDate) {
                     return false;
                 }
 
                 return dueDate >= startOfToday && dueDate <= nextSevenDays;
             })
-            .sort((leftTask, rightTask) => new Date(leftTask.dueDate) - new Date(rightTask.dueDate));
+            .sort((leftTask, rightTask) => {
+                const leftDueDate = parseTaskDueDate(leftTask.dueDate);
+                const rightDueDate = parseTaskDueDate(rightTask.dueDate);
+
+                if (!leftDueDate || !rightDueDate) {
+                    return 0;
+                }
+
+                return leftDueDate - rightDueDate;
+            });
     }, [tasks]);
 //I built this return component to help guide AI with what I wanted the TaskDueDates component to do, 
 // which is to display a list of tasks that are due within the next 7 days. 
@@ -38,7 +48,7 @@ export const TaskDueDates = () => {
                     {upcomingTasks.map((task) => (
                         <li key={task.id}>
                             <strong>{task.name ?? task.title ?? "Untitled task"}</strong> - Due:{" "}
-                            {new Date(task.dueDate).toLocaleDateString()}
+                            {parseTaskDueDate(task.dueDate)?.toLocaleDateString() ?? "No due date"}
                         </li>
                     ))}
                 </ul>
